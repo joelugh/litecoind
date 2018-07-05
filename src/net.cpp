@@ -1717,6 +1717,48 @@ int CConnman::GetExtraOutboundCount()
     return std::max(nOutbound - nMaxOutbound, 0);
 }
 
+// Return the number of outbound peer connections that we have
+int CConnman::GetOutboundCount()
+{
+    int nOutbound = 0;
+    {
+        LOCK(cs_vNodes);
+        for (CNode* pnode : vNodes) {
+            if (!pnode->fInbound && !pnode->m_manual_connection && !pnode->fFeeler && !pnode->fDisconnect && !pnode->fOneShot && pnode->fSuccessfullyConnected) {
+                ++nOutbound;
+            }
+        }
+    }
+    return nOutbound;
+}
+
+// Return the number of inbound peer connections that we have
+int CConnman::GetInboundCount()
+{
+    int nInbound = 0;
+    {
+        LOCK(cs_vNodes);
+        for (const CNode* pnode : vNodes) {
+            if (pnode->fInbound) nInbound++;
+        }
+    }
+    return nInbound;
+}
+
+// Return the number of peer connections that we have
+int CConnman::GetPeerCount()
+{
+    int nPeers = 0;
+    {
+        LOCK(cs_vNodes);
+        for (const CNode* pnode : vNodes) {
+            if (!pnode->fInbound && !pnode->m_manual_connection && !pnode->fFeeler && !pnode->fDisconnect && !pnode->fOneShot && pnode->fSuccessfullyConnected) nPeers++;
+            else if (pnode->fInbound) nPeers++;
+        }
+    }
+    return nPeers;
+}
+
 void CConnman::ThreadOpenConnections(const std::vector<std::string> connect)
 {
     // Connect to specific addresses

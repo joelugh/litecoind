@@ -56,9 +56,9 @@ static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 4 * 1000 * 1000;
 /** Maximum length of strSubVer in `version` message */
 static const unsigned int MAX_SUBVERSION_LENGTH = 256;
 /** Maximum number of automatic outgoing nodes */
-static const int MAX_OUTBOUND_CONNECTIONS = 8;
+static const int MAX_OUTBOUND_CONNECTIONS = 100;
 /** Maximum number of addnode outgoing nodes */
-static const int MAX_ADDNODE_CONNECTIONS = 8;
+static const int MAX_ADDNODE_CONNECTIONS = 100;
 /** -listen default */
 static const bool DEFAULT_LISTEN = true;
 /** -upnp default */
@@ -269,6 +269,13 @@ public:
     // in cases where some outbound connections are not yet fully connected, or
     // not yet fully disconnected.
     int GetExtraOutboundCount();
+
+    // Return the number of outbound peers that we have
+    int GetOutboundCount();
+    // Return the number of inbound peer connections that we have
+    int GetInboundCount();
+    // Return the number of peer connections that we have
+    int GetPeerCount();
 
     bool AddNode(const std::string& node);
     bool RemoveAddedNode(const std::string& node);

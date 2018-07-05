@@ -805,6 +805,16 @@ PeerLogicValidation::PeerLogicValidation(CConnman* connmanIn, CScheduler &schedu
     // timer.
     static_assert(EXTRA_PEER_CHECK_INTERVAL < STALE_CHECK_INTERVAL, "peer eviction timer should be less than stale tip check timer");
     scheduler.scheduleEvery(std::bind(&PeerLogicValidation::CheckForStaleTipAndEvictPeers, this, consensusParams), EXTRA_PEER_CHECK_INTERVAL * 1000);
+
+    LogPrint(BCLog::NET, "Peer log:total_peers,outbound_peers,inbound_peers\n");
+    scheduler.scheduleEvery(std::bind(&PeerLogicValidation::LogPeers, this), PEER_LOG_INTERVAL * 1000);
+}
+
+void PeerLogicValidation::LogPeers() {
+    int outbound_peers = connman->GetOutboundCount();
+    int inbound_peers = connman->GetInboundCount();
+    int total_peers = outbound_peers + inbound_peers;
+    LogPrint(BCLog::NET, "Peer log:%d,%d,%d\n", total_peers, outbound_peers, inbound_peers);
 }
 
 void PeerLogicValidation::BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindex, const std::vector<CTransactionRef>& vtxConflicted) {

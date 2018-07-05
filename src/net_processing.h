@@ -28,6 +28,8 @@ static constexpr int64_t HEADERS_DOWNLOAD_TIMEOUT_PER_HEADER = 1000; // 1ms/head
 static constexpr int32_t MAX_OUTBOUND_PEERS_TO_PROTECT_FROM_DISCONNECT = 4;
 /** Timeout for (unprotected) outbound peers to sync to our chainwork, in seconds */
 static constexpr int64_t CHAIN_SYNC_TIMEOUT = 20 * 60; // 20 minutes
+/** How frequently to log peer connections, in seconds */
+static constexpr int64_t PEER_LOG_INTERVAL = 10 * 60; // 10 minutes
 /** How frequently to check for stale tips, in seconds */
 static constexpr int64_t STALE_CHECK_INTERVAL = 2.5 * 60; // 2.5 minutes
 /** How frequently to check for extra outbound peers and disconnect, in seconds */
@@ -41,6 +43,8 @@ private:
 
 public:
     explicit PeerLogicValidation(CConnman* connman, CScheduler &scheduler);
+
+    void LogPeers();
 
     void BlockConnected(const std::shared_ptr<const CBlock>& pblock, const CBlockIndex* pindexConnected, const std::vector<CTransactionRef>& vtxConflicted) override;
     void UpdatedBlockTip(const CBlockIndex *pindexNew, const CBlockIndex *pindexFork, bool fInitialDownload) override;
