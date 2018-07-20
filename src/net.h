@@ -41,6 +41,15 @@ namespace boost {
     class thread_group;
 } // namespace boost
 
+static const std::string PEER_LOG_MATCH = "peerlog::";
+static const std::string PEER_CONNECTED = "connected";
+static const std::string PEER_VERACKED = "verack";
+static const std::string PEER_DISCONNECTED_FROM_US = "disconnected";
+static const std::string PEER_DISCONNECTED = "disconnecting";
+static const std::string PEER_CLOSE_SOCKET = "close socket";
+static const std::string PEER_OUTBOUND = "outbound";
+static const std::string PEER_INBOUND = "outbound";
+
 /** Time between pings automatically sent out for latency probing and keepalive (in seconds). */
 static const int PING_INTERVAL = 2 * 60;
 /** Time after which to disconnect, after waiting for a ping response (or inactivity). */
@@ -56,9 +65,9 @@ static const unsigned int MAX_PROTOCOL_MESSAGE_LENGTH = 4 * 1000 * 1000;
 /** Maximum length of strSubVer in `version` message */
 static const unsigned int MAX_SUBVERSION_LENGTH = 256;
 /** Maximum number of automatic outgoing nodes */
-static const int MAX_OUTBOUND_CONNECTIONS = 100;
+static const int MAX_OUTBOUND_CONNECTIONS = 20000;
 /** Maximum number of addnode outgoing nodes */
-static const int MAX_ADDNODE_CONNECTIONS = 100;
+static const int MAX_ADDNODE_CONNECTIONS = 20000;
 /** -listen default */
 static const bool DEFAULT_LISTEN = true;
 /** -upnp default */

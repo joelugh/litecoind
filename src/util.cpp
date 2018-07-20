@@ -767,6 +767,7 @@ int RaiseFileDescriptorLimit(int nMinFD) {
 #else
     struct rlimit limitFD;
     if (getrlimit(RLIMIT_NOFILE, &limitFD) != -1) {
+        LogPrintf("File Descriptor Limits: current %d, max %d, desired %d\n", limitFD.rlim_cur, limitFD.rlim_max, nMinFD);
         if (limitFD.rlim_cur < (rlim_t)nMinFD) {
             limitFD.rlim_cur = nMinFD;
             if (limitFD.rlim_cur > limitFD.rlim_max)

@@ -486,6 +486,12 @@ void CNode::CloseSocketDisconnect()
     if (hSocket != INVALID_SOCKET)
     {
         LogPrint(BCLog::NET, "disconnecting peer=%d\n", id);
+        LogPrintf("%s%s,%s,%s,id:%d\n",
+            PEER_LOG_MATCH,
+            PEER_CLOSE_SOCKET,
+            this->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+            this->addr.ToString(),
+            this->GetId());
         CloseSocket(hSocket);
     }
 }
@@ -762,6 +768,13 @@ bool CNode::ReceiveMsgBytes(const char *pch, unsigned int nBytes, bool& complete
 
         if (msg.in_data && msg.hdr.nMessageSize > MAX_PROTOCOL_MESSAGE_LENGTH) {
             LogPrint(BCLog::NET, "Oversized message from peer=%i, disconnecting\n", GetId());
+            LogPrintf("%s%s,%s,%s,id:%d reason:%s\n",
+                PEER_LOG_MATCH,
+                PEER_DISCONNECTED,
+                this->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+                this->addr.ToString(),
+                this->GetId(),
+                "oversized message");
             return false;
         }
 
@@ -914,6 +927,13 @@ size_t CConnman::SocketSendData(CNode *pnode) const
                 if (nErr != WSAEWOULDBLOCK && nErr != WSAEMSGSIZE && nErr != WSAEINTR && nErr != WSAEINPROGRESS)
                 {
                     LogPrintf("socket send error %s\n", NetworkErrorString(nErr));
+                    LogPrintf("%s%s,%s,%s,id:%d reason:%s\n",
+                        PEER_LOG_MATCH,
+                        PEER_DISCONNECTED,
+                        pnode->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+                        pnode->addr.ToString(),
+                        pnode->GetId(),
+                        "socket send error");
                     pnode->CloseSocketDisconnect();
                 }
             }
@@ -1350,8 +1370,16 @@ void CConnman::ThreadSocketHandler()
                 if (nBytes > 0)
                 {
                     bool notify = false;
-                    if (!pnode->ReceiveMsgBytes(pchBuf, nBytes, notify))
+                    if (!pnode->ReceiveMsgBytes(pchBuf, nBytes, notify)) {
+                        LogPrintf("%s%s,%s,%s,id:%d reason:%s\n",
+                            PEER_LOG_MATCH,
+                            PEER_DISCONNECTED,
+                            pnode->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+                            pnode->addr.ToString(),
+                            pnode->GetId(),
+                            "could not receive message bytes");
                         pnode->CloseSocketDisconnect();
+                    }
                     RecordBytesRecv(nBytes);
                     if (notify) {
                         size_t nSizeAdded = 0;
@@ -1375,6 +1403,13 @@ void CConnman::ThreadSocketHandler()
                     // socket closed gracefully
                     if (!pnode->fDisconnect) {
                         LogPrint(BCLog::NET, "socket closed\n");
+                        LogPrintf("%s%s,%s,%s,id:%d reason:%s\n",
+                            PEER_LOG_MATCH,
+                            PEER_DISCONNECTED,
+                            pnode->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+                            pnode->addr.ToString(),
+                            pnode->GetId(),
+                            "no bytes");
                     }
                     pnode->CloseSocketDisconnect();
                 }
@@ -1384,8 +1419,16 @@ void CConnman::ThreadSocketHandler()
                     int nErr = WSAGetLastError();
                     if (nErr != WSAEWOULDBLOCK && nErr != WSAEMSGSIZE && nErr != WSAEINTR && nErr != WSAEINPROGRESS)
                     {
-                        if (!pnode->fDisconnect)
+                        if (!pnode->fDisconnect) {
                             LogPrintf("socket recv error %s\n", NetworkErrorString(nErr));
+                            LogPrintf("%s%s,%s,%s,id:%d reason:%s\n",
+                                PEER_LOG_MATCH,
+                                PEER_DISCONNECTED,
+                                pnode->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+                                pnode->addr.ToString(),
+                                pnode->GetId(),
+                                "socket receive error");
+                        }
                         pnode->CloseSocketDisconnect();
                     }
                 }
@@ -2228,6 +2271,13 @@ void CConnman::SetNetworkActive(bool active)
         LOCK(cs_vNodes);
         // Close sockets to all nodes
         for (CNode* pnode : vNodes) {
+            LogPrintf("%s%s,%s,%s,id:%d reason:%s\n",
+                PEER_LOG_MATCH,
+                PEER_DISCONNECTED,
+                pnode->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+                pnode->addr.ToString(),
+                pnode->GetId(),
+                "network inactive");
             pnode->CloseSocketDisconnect();
         }
     }
@@ -2464,8 +2514,16 @@ void CConnman::Stop()
     }
 
     // Close sockets
-    for (CNode* pnode : vNodes)
+    for (CNode* pnode : vNodes) {
+        LogPrintf("%s%s,%s,%s,id:%d reason:%s\n",
+            PEER_LOG_MATCH,
+            PEER_DISCONNECTED,
+            pnode->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+            pnode->addr.ToString(),
+            pnode->GetId(),
+            "stopping");
         pnode->CloseSocketDisconnect();
+    }
     for (ListenSocket& hListenSocket : vhListenSocket)
         if (hListenSocket.socket != INVALID_SOCKET)
             if (!CloseSocket(hListenSocket.socket))
@@ -2793,6 +2851,12 @@ CNode::CNode(NodeId idIn, ServiceFlags nLocalServicesIn, int nMyStartingHeightIn
     } else {
         LogPrint(BCLog::NET, "Added connection peer=%d\n", id);
     }
+    LogPrintf("%s%s,%s,%s,id:%d\n",
+        PEER_LOG_MATCH,
+        PEER_CONNECTED,
+        this->fInbound ? PEER_INBOUND : PEER_OUTBOUND,
+        this->addr.ToString(),
+        this->GetId());
 }
 
 CNode::~CNode()
