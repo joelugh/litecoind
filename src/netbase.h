@@ -25,6 +25,16 @@ static const int DEFAULT_CONNECT_TIMEOUT = 5000;
 //! -dns default
 static const int DEFAULT_NAME_LOOKUP = true;
 
+static const std::string PEER_LOG_MATCH = "peerlog::";
+static const std::string PEER_CONNECT_FAIL = "connection failed";
+static const std::string PEER_CONNECTED = "connected";
+static const std::string PEER_VERACKED = "verack";
+static const std::string PEER_DISCONNECTED_FROM_US = "disconnected";
+static const std::string PEER_DISCONNECTED = "disconnecting";
+static const std::string PEER_CLOSE_SOCKET = "close socket";
+static const std::string PEER_OUTBOUND = "outbound";
+static const std::string PEER_INBOUND = "outbound";
+
 class proxyType
 {
 public:
