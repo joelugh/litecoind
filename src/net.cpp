@@ -2026,13 +2026,15 @@ void CConnman::ThreadOpenAddedConnections()
                 tried = true;
                 CAddress addr(CService(), NODE_NONE);
                 OpenNetworkConnection(addr, false, &grant, info.strAddedNode.c_str(), false, false, true);
-                if (!interruptNet.sleep_for(std::chrono::milliseconds(500)))
-                    return;
+                //: don't sleep, just keep trying to make connections
+                // if (!interruptNet.sleep_for(std::chrono::milliseconds(500)))
+                //     return;
             }
         }
+        //: don't sleep, just keep trying to make connections
         // Retry every 60 seconds if a connection was attempted, otherwise two seconds
-        if (!interruptNet.sleep_for(std::chrono::seconds(tried ? 60 : 2)))
-            return;
+        // if (!interruptNet.sleep_for(std::chrono::seconds(tried ? 60 : 2)))
+        //     return;
     }
 }
 
